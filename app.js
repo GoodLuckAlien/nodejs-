@@ -3,24 +3,23 @@ const PromiseA = require('./unit/promiseA') //
 const express=require('express')
 const app = express()
 const server = require('http').createServer(app)
-const bodyParse = require('body-parser')
 const router = require('./routers')
+const bodyParse = require('body-parser')
 const config = require('./config')
 const err = require('./controllers/err')
-
-
 
 //配置静态资源中间服务
 app.use(express.static('static'))
 
 //配置post请求体解析中间件 
-app.use(bodyParse.urlencoded({ extended:false }))
+app.use(bodyParse.json({ extended:false }))
 
 //配置文件中的加密信息
 app.locals.config = config
 
 //路由中间件
 app.use(router)
+
 
 //配置相应头中间件
 app.use(function(req,res,next){
