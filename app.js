@@ -3,11 +3,14 @@ const PromiseA = require('./unit/promiseA') //
 const express=require('express')
 const app = express()
 const server = require('http').createServer(app)
+const webSorketServer = require('ws')
+const wss = new webSorketServer.Server ({ server  })
 const router = require('./routers')
 const bodyParse = require('body-parser')
 const config = require('./config')
 const err = require('./controllers/err')
 
+let clients = [] //记录顾客列表
 //配置静态资源中间服务
 app.use(express.static('static'))
 
@@ -37,6 +40,20 @@ if(config.isDebug){
 }else{
     //记录日log4日志
 }
+//建立websorket连接
+wss.on('connection',ws=>{
+
+    ws.on('message',message=>{
+
+        clients.forEach(item=>{
+            if(item.readyState===1){
+                item.send(message)
+            }
+        })
+    })
+    // console.log(ws.)
+    clients.push(ws)
+})
 
 server.listen(8080,'127.0.0.2')
 

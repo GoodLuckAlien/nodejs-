@@ -3,7 +3,7 @@
 const User = require('../model/use')
 const PromiseA = require('../unit/promiseA')
 const jwt = require('jsonwebtoken')
-
+const fs = require('fs')
 //获取授权码
 exports.getApiCode = function(req,res,next){
    const code = req.query.code
@@ -104,7 +104,7 @@ exports.userLogin = function(req,res,next){
                    else{
                        //生成 token 
                        let content = { msg : username }
-                       let secretOrPrivateKey = password
+                       let secretOrPrivateKey = 'zhaolin'
                        let token = jwt.sign(content,secretOrPrivateKey,{
                            expiresIn:60*60*24*7, // 七天有效期
                        })
@@ -114,11 +114,11 @@ exports.userLogin = function(req,res,next){
             })
         })
         promise.then((response)=>{
+            //插入token
            db.insertToken(response,function(err,result){
                 if(err){
                     next({ code:"10000",content:'无效的token插入'  })
                 }else{
-                    console.log(result)
                     res.json({
                         code:'0',
                         token:response,
@@ -132,4 +132,17 @@ exports.userLogin = function(req,res,next){
              })
          })
     }
+}
+//上传头像
+exports.uploadImg = function(req,res,next){
+    const token = req.get('Authorization')
+    //解析token 
+    const result = jwt.verify(token,'zhaolin')
+    console.log(result.msg)
+    const imgName = req.file.originalname.split('.')
+    const ext = imgName[ imgName.length - 1 ]
+    fs.renameSync(req.file.path,'static/img/'+result.msg+'.'+ext)
+    res.json({
+        code:'0',
+    })
 }

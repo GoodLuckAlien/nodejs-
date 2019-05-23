@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        #ul{
+            width: 400px;
+            height: 600px;
+            border: 1px solid #ccc;
+            overflow-x:hidden;
+            padding-top: 20px;
+            padding-left: 0;
+        }
+        li{
+            list-style: none;
+            text-align: center;
+            padding: 5px 15px;
+            float: left;
+            clear: both;
+            background-color: green;
+            color:#fff;
+            border-radius: 5px;
+            margin-top: 10px;
+            
+        }
+    </style>
+   
+    <title>Document</title>
+</head>
+<body>
+   <ul id="ul"></ul>
+   <input type="text" id="input">
+   <button id="btn">发送</button>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded',()=>{
+           var ws=new WebSocket('ws://local.beautfull.zhaolin:8080');
+           ws.onopen=function(e){
+               console.log('已经连接到服务器');
+           };
+           btn.onclick=function(){
+               var message=input.value;
+               ws.send(message);
+           }
+           ws.onmessage=function(res){
+             var li=document.createElement('li');
+                 li.innerText=res.data;
+                 ul.appendChild(li);
+           }
+
+    })
+</script>
+</html>

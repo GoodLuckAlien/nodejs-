@@ -14,6 +14,7 @@ function User (User){
 User.prototype.register = function(callback){
      db.query('insert into user(username,password) values( ? , ?  )',[this.username,this.password],function(err,result){
          if(err){
+             console.log(err)
              callback(err,null)
          }
          else{
