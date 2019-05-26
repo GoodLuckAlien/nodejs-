@@ -4,6 +4,7 @@ const User = require('../model/use')
 const PromiseA = require('../unit/promiseA')
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
+
 //获取授权码
 exports.getApiCode = function(req,res,next){
    const code = req.query.code
@@ -39,6 +40,11 @@ exports.resgisterUser = function(req,res,next){
                     //处理错误日志
                     next({ code:'10000',content:"注册失败"  })
                 }else{
+                   //写入数组库  
+
+                   db.insertUserInformation(result,(err,result)=>{
+                        console.log(err,result)
+                   })
                   res.json({
                    code:'0',
                    data:{},
@@ -138,11 +144,42 @@ exports.uploadImg = function(req,res,next){
     const token = req.get('Authorization')
     //解析token 
     const result = jwt.verify(token,'zhaolin')
-    console.log(result.msg)
-    const imgName = req.file.originalname.split('.')
-    const ext = imgName[ imgName.length - 1 ]
-    fs.renameSync(req.file.path,'static/img/'+result.msg+'.'+ext)
-    res.json({
-        code:'0',
-    })
+    //保存图片路径
+    if(result.msg){  
+        const imgName = req.file.originalname.split('.')
+        const ext = imgName[ imgName.length - 1 ]
+        if(ext!=='jpg' && ext!=='png' ){
+            res.json({
+                code:'10000',
+                content:'文件格式错误',
+            })
+        }
+        const savePath = 'http://local.beautfull.zhaolin:8080/static/img/'+result.msg+'.'+ext
+        User.uploadHeadImg(result.msg,savePath,(err,r)=>{
+            if(err){
+                //删除文件
+                fs.unlinkSync(req.file.path)
+            }else{
+                res.json({
+                    code:'0',
+                    content:'头像上传成功',
+                })
+                //删除之前得文件
+                const extArr = ['jpg','png']
+                extArr.forEach(i=>{
+                  let status = fs.existsSync('static/img/'+result.msg+'.'+i)   
+                  if(status){
+                    fs.unlinkSync('static/img/'+result.msg+'.'+i)
+                  }
+                })
+                fs.renameSync(req.file.path,'static/img/'+result.msg+'.'+ext)
+            }
+        })
+    }
+    else{
+        res.json({
+            code:'10000',
+            content:'token已经过期，请重新登陆',
+        })
+    }
 }

@@ -18,9 +18,19 @@ User.prototype.register = function(callback){
              callback(err,null)
          }
          else{
-             callback(null,result)
+             callback(null,result.insertId)
          }
      })
+}
+User.prototype.insertUserInformation = function(user_id,callback){
+    db.query('insert into userInformation(username,user_id) values( ? , ?  )',[this.username,user_id],function(err,result){
+        if(err){
+            callback(err,null)
+        }
+        else{
+            callback(null,result)
+        }
+    })
 }
 //手机号注册验证 
 User.prototype.verification = function(callback){
@@ -52,6 +62,17 @@ User.prototype.insertToken = function(token,callback){
             callback(null,result)
         }
    }) 
+}
+//插入头像
+User.uploadHeadImg = function(username,savePath,callback){
+    db.query('update userInformation set headImg = ? where username = ? ',[savePath,username],function(err,result){
+        if(err){
+            callback(err,null)
+        }
+        else{
+            callback(null,result)
+        }
+    })
 }
 
 module.exports = User

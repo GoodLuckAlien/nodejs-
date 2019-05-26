@@ -51,7 +51,7 @@ wss.on('connection',ws=>{
             }
         })
     })
-    // console.log(ws.)
+     console.log(clients.length)
     clients.push(ws)
 })
 
